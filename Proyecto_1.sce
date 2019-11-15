@@ -55,20 +55,24 @@ deff('an= linFun(x)', 'an = iLinM*x + iLinB')
 [iLinM,iLinB, sig]  = reglin(x,y)
 
     //obtener R cuadrada de lineal
-    
+    rLin = 0.1542448
 
 //Haciendo y transpuesta para las operaciones en scilab
 y = y'
+
+inverseY = y'
 
 //regresion cuadratica
 deff('anCuad = cuadReg(x, y)', 'mat = [length(x), sum(x), sum(x^2), sum(y); sum(x), sum(x^2), sum(x^3), sumaDiag(y * x); sum(x^2), sum(x^3), sum(x^4), sumaDiag(y * (x^2))], mat = gaussJordan(mat), anCuad = mat(:,4)') 
 anCuad = cuadReg(x, y)
 anCuad
 
+deff('an = cuadFun(x)', 'an = anCuad(1) + (anCuad(2) * x) + (anCuad(3) * (x^2))')
+
     //obtener R cuadrada de cuadratica
 function rCuad = rFunCuad(anCuad, x, y)
     SST = sum((y - mean(y))^2)
-    SSR = sum((y' - anCuad(1) - (anCuad(2) * x) - (anCuad(3) * (x^2)))^2)
+    SSR = sum((y' - cuadFun(x))^2)
     rCuad = 1 - (SSR / SST)
 endfunction
 
@@ -76,8 +80,9 @@ rCuad = rFunCuad(anCuad, x, y)
 
 //regresion exponencial 
 deff('anExp = expReg(x, y)', 'mat = [length(x), sum(x), sum(log(y)); sum(x), sum(x^2), sumaDiag(log(y) * x)], mat = gaussJordan(mat), anExp = mat(:,3)')
-inverseY = y'
-deff('regAnsExp = regExp(x)', 'regAnsExp = %e ^anExp(1) * %e ^ (anExp(2) * x)' )
+
+
+deff('regAnsExp = expFun(x)', 'regAnsExp = %e ^anExp(1) * %e ^ (anExp(2) * x)' )
 anExp = expReg(x, y)
 
     //obtener R cuadrada de exponencial
@@ -86,7 +91,7 @@ function rExp = rFunExp(anExp, x, y)
     SST = sum((y - yBar)^2)
     tmp = sum(%e ^(anExp(2) * x))
   //  SSR = sum( (y' - %e ^ anExp(1) * %e ^ (anExp(2) * x) )^2 )
-    SSR = sum( (y' - regExp(x))^2 )
+    SSR = sum( (y' - expFun(x))^2 )
     rExp = 1 - (SSR / SST)
 endfunction
 
@@ -96,6 +101,8 @@ rExp = rFunExp(anExp, x, y)
 //regresion de potencia
 deff('anPot = potReg(x,y)', 'mat = [length(x), sum(log(x)), sum(log(y)); sum(log(x)), sum((log(x))^2), sumaDiag(log(x) * log(y))], mat = gaussJordan(mat), anPot = mat(:,3)')
 anPot = potReg(x, y)
+
+deff('an = potFun(x)', 'an = (%e ^ anPot(1)) * x ^ anPot(2)' )
 
 
     //obtener R cuadrada de potencia
@@ -115,5 +122,48 @@ disp("- Potencial  :  y = (" + string((%e ^ anPot(1))) + ") * x ^ (" + string(an
 
 
 //mostrar las conclusiones
+function [dBestR,sBest] = dGetR(rLin, rCuad, rExp, rPot)
+    dBestR = max(rLin, rCuad, rExp, rPot)
+    if dBestR == rLin then
+        sBest = "lineal"
+    end
+    if dBestR == rCuad then
+        sBest = "cuadrático"
+    end
+    if dBestR == rExp then
+        sBest = "exponencial"
+    end
+    if dBestR == rPot then
+        sBest = "potencial"
+    end
+    
+endfunction
+
+[dBestR,sBest] = dGetR(rLin, rCuad, rExp, rPot)
+
+disp("- El mejor modelo será el " + sBest + ", con una r^2 de " + string(dBestR))
+
+dTemp = 0
+
+disp("Usando cada modelo, los valores estimados para x = 60 serán:")
+dTemp = linFun(60)
+disp("      -Lineal      : " + string(dTemp))
+dTemp = cuadFun(60)
+disp("      -Cuadrático  : " + string(dTemp))
+dTemp = expFun(60)
+disp("      -Exponencial : " + string(dTemp))
+dTemp = potFun(60)
+disp("      -Potencial   : " + string(dTemp))
+
+disp("De acuerdo con los cuadrador de las distancias entre cada punto y el modelo exponencial, existen valores anormales:")
+
+//Generar plots con PLOTLY
+xD = [0:1:60]
+plot(xD, linFun(xD),"b", 'LineWidth', 2)
+plot(xD, cuadFun(xD),"g", 'LineWidth', 2)
+plot(xD, expFun(xD),"r", 'LineWidth', 2)
+plot(xD, potFun(xD),"black", 'LineWidth', 2)
+xtitle ( "Regresiones" , "X axis" , "Y axis" )
+legend("Lineal","Cuadrático","Exponencial", "Potencial")
 
 //generar nuevo .xls
