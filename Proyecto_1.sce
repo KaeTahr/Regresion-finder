@@ -37,6 +37,12 @@ function dSum = sumaDiag(dMat)
     end
 endfunction
 
+function dRsq = calcR(func, x, y)
+    SST = sum((y - mean(y))^2)
+    SSR = sum((y - func(x) )^2)
+    dRsq = 1 - (SSR / SST)
+endfunction
+
 /////////////////main////////////////
 //Pedir archivo .xls
 //data = getFile()
@@ -55,67 +61,40 @@ deff('an= linFun(x)', 'an = iLinM*x + iLinB')
 [iLinM,iLinB, sig]  = reglin(x,y)
 
     //obtener R cuadrada de lineal
-    rLin = 0.1542448
+rLin = calcR(linFun, x, y)
 
 //Haciendo y transpuesta para las operaciones en scilab
-y = y'
 
 inverseY = y'
 
 //regresion cuadratica
 deff('anCuad = cuadReg(x, y)', 'mat = [length(x), sum(x), sum(x^2), sum(y); sum(x), sum(x^2), sum(x^3), sumaDiag(y * x); sum(x^2), sum(x^3), sum(x^4), sumaDiag(y * (x^2))], mat = gaussJordan(mat), anCuad = mat(:,4)') 
-anCuad = cuadReg(x, y)
+anCuad = cuadReg(x, y')
 anCuad
 
 deff('an = cuadFun(x)', 'an = anCuad(1) + (anCuad(2) * x) + (anCuad(3) * (x^2))')
 
-    //obtener R cuadrada de cuadratica
-function rCuad = rFunCuad(anCuad, x, y)
-    SST = sum((y - mean(y))^2)
-    SSR = sum((y' - cuadFun(x))^2)
-    rCuad = 1 - (SSR / SST)
-endfunction
-
-rCuad = rFunCuad(anCuad, x, y)
+rCuad = calcR(cuadFun, x, y)
 
 //regresion exponencial 
 deff('anExp = expReg(x, y)', 'mat = [length(x), sum(x), sum(log(y)); sum(x), sum(x^2), sumaDiag(log(y) * x)], mat = gaussJordan(mat), anExp = mat(:,3)')
 
 
 deff('regAnsExp = expFun(x)', 'regAnsExp = %e ^anExp(1) * %e ^ (anExp(2) * x)' )
-anExp = expReg(x, y)
+anExp = expReg(x, y')
 
-    //obtener R cuadrada de exponencial
-function rExp = rFunExp(anExp, x, y)
-    yBar=(mean(y))
-    SST = sum((y - yBar)^2)
-    tmp = sum(%e ^(anExp(2) * x))
-  //  SSR = sum( (y' - %e ^ anExp(1) * %e ^ (anExp(2) * x) )^2 )
-    SSR = sum( (y' - expFun(x))^2 )
-    rExp = 1 - (SSR / SST)
-endfunction
-
-
-rExp = rFunExp(anExp, x, y)
+rExp = calcR(expFun, x, y)
 
 //regresion de potencia
 deff('anPot = potReg(x,y)', 'mat = [length(x), sum(log(x)), sum(log(y)); sum(log(x)), sum((log(x))^2), sumaDiag(log(x) * log(y))], mat = gaussJordan(mat), anPot = mat(:,3)')
-anPot = potReg(x, y)
+anPot = potReg(x, y')
 
 deff('an = potFun(x)', 'an = (%e ^ anPot(1)) * x ^ anPot(2)' )
 
-
-    //obtener R cuadrada de potencia
-function rPot = rFunPot(anPot, x, y)
-    SST = sum((y - mean(y))^2)
-    SSR = sum((y' - ((%e ^ anPot(1)) * x ^ anPot(2)) )^2)
-    rPot = 1 - (SSR / SST)
-endfunction
-
-rPot = rFunPot(anPot, x, y)
+rPot = calcR(potFun, x, y)
 
 //mostrar seccion I, las formulas de regresion con su R cuadrada
-disp("- Lineal     :  y = (" + string(iLinB) + ') + (' + string(iLinM) + ') * x')
+disp("- Lineal     :  y = (" + string(iLinB) + ') + (' + string(iLinM) + ') * x, r^2 = '+string(rLin))
 disp("- Cuadrático :  y = (" + string(anCuad(1)) + ") + (" + string(anCuad(2)) + ") * x + (" + string(anCuad(3)) + ") * x ^ 2, r^ 2 = " + string(rCuad))
 disp("- Exponencial:  y = (" + string((%e ^ anExp(1))) + ") * e ^ ((" + string(anExp(2)) + ") * x), r ^ 2 = " + string(rExp))
 disp("- Potencial  :  y = (" + string((%e ^ anPot(1))) + ") * x ^ (" + string(anPot(2)) + "), r ^ 2 = " + string (rPot))
