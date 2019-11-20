@@ -43,6 +43,12 @@ function dRsq = calcR(func, x, y)
     dRsq = 1 - (SSR / SST)
 endfunction
 
+function dRsq = calcRLogs(func, x, y)
+    SST = sum((log(y) - mean(log(y)))^2)
+    SSR = sum((log(y) - log(func(x)) )^2)
+    dRsq = 1 - (SSR / SST)
+endfunction
+
 /////////////////main////////////////
 //Pedir archivo .xls
 //data = getFile()
@@ -83,7 +89,7 @@ deff('anExp = expReg(x, y)', 'mat = [length(x), sum(x), sum(log(y)); sum(x), sum
 deff('regAnsExp = expFun(x)', 'regAnsExp = %e ^anExp(1) * %e ^ (anExp(2) * x)' )
 anExp = expReg(x, y')
 
-rExp = calcR(expFun, x, y)
+rExp = calcRLogs(expFun, x, y)
 
 //regresion de potencia
 deff('anPot = potReg(x,y)', 'mat = [length(x), sum(log(x)), sum(log(y)); sum(log(x)), sum((log(x))^2), sumaDiag(log(x) * log(y))], mat = gaussJordan(mat), anPot = mat(:,3)')
@@ -91,7 +97,7 @@ anPot = potReg(x, y')
 
 deff('an = potFun(x)', 'an = (%e ^ anPot(1)) * x ^ anPot(2)' )
 
-rPot = calcR(potFun, x, y)
+rPot = calcRLogs(potFun, x, y)
 
 //mostrar seccion I, las formulas de regresion con su R cuadrada
 disp("- Lineal     :  y = (" + string(iLinB) + ') + (' + string(iLinM) + ') * x, r^2 = '+string(rLin))
