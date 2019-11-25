@@ -29,7 +29,6 @@ function [dArrX, dArrY] = getFile()
     dSheet = dSheet(1)
     dArrX=dSheet(:,1)
     dArrY=dSheet(:,2)
-    
 endfunction
 
 ////////////////////////////////////////
@@ -59,7 +58,6 @@ function dMat = gaussJordan(dMat)
         end
     end
 endfunction
-
 
 ////////////////////////////////////////
 // sumaDiag
@@ -94,8 +92,8 @@ function [dBestR,sBest, funWin] = dGetR(rLin, rCuad, rExp, rPot)
         sBest = "potencial"
         funWin = potFun
     end
-    
 endfunction
+
 ////////////////////////////////////////
 // calcR
 // Calcula el valor de r² dado un vector de valores x, y, y la función de
@@ -178,7 +176,7 @@ function outputFile(fun)
     write_csv(string(fun(dArrY)), sFileName)  
 endfunction
 
-/////////////////main////////////////
+/////////////////////////////////////main//////////////////////////////////////
 //Pedir archivo .xls
 [dArrX,dArrY] = getFile()
 
