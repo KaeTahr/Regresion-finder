@@ -1,14 +1,17 @@
 clear
 
-//function data = getFile()
-//    sFileName = input("Cuál es el nombre del archivo .xls? ", "string")
-//    if grep(sFileName, '/.*\.xls$/', 'r') == []  then
-//        sFileName = strcat(sFileName, '.xls')
-//    end
-//
-//    data = readxls(sFileName)
-    //TODO: parse data
-//endfunction
+function [dArrX, dArrY] = getFile()
+    sFileName = input("¿Cuál es el nombre del archivo .xls? ", "string")
+    if grep(sFileName, '/.*\.xls$/', 'r') == []  then
+        sFileName = sFileName + '.xls'
+    end
+
+    dSheet = readxls(sFileName)
+    dSheet = dSheet(1)
+    dArrX=dSheet(:,1)
+    dArrY=dSheet(:,2)
+    
+endfunction
 
 function dMat = gaussJordan(dMat)
     fact = 0
@@ -37,94 +40,104 @@ function dSum = sumaDiag(dMat)
     end
 endfunction
 
-function dRsq = calcR(func, x, y)
-    SST = sum((y - mean(y))^2)
-    SSR = sum((y - func(x) )^2)
+function dRsq = calcR(func, dArrX, dArrY)
+    SST = sum((dArrY - mean(dArrY))^2)
+    SSR = sum((dArrY - func(dArrX) )^2)
     dRsq = 1 - (SSR / SST)
 endfunction
 
-function dRsq = calcRLogs(func, x, y)
-    SST = sum((log(y) - mean(log(y)))^2)
-    SSR = sum((log(y) - log(func(x)) )^2)
+function dRsq = calcRLogs(func, dArrX, dArrY)
+    SST = sum((log(dArrY) - mean(log(dArrY)))^2)
+    SSR = sum((log(dArrY) - log(func(dArrX)) )^2)
     dRsq = 1 - (SSR / SST)
 endfunction
 
 /////////////////main////////////////
 //Pedir archivo .xls
-//data = getFile()
-
-17.4
-
-// example data
-x = [20, 30 , 10, 40, 50]
-y = [15, 12, 25, 30, 5]
-
+[dArrX,dArrY] = getFile()
 
 //obtener regresiones y su R cuadrada
 
 //obtener regresion lineal
-deff('an= linFun(x)', 'an = iLinM*x + iLinB')
-[iLinM,iLinB, sig]  = reglin(x,y)
+deff('an= linFun(dArrX)', 'an = iLinM*dArrX + iLinB')
+[iLinM,iLinB, dSigLin]  = reglin(dArrX',dArrY')
 
     //obtener R cuadrada de lineal
-rLin = calcR(linFun, x, y)
-
-//Haciendo y transpuesta para las operaciones en scilab
-
-inverseY = y'
+rLin = calcR(linFun, dArrX, dArrY)
 
 //regresion cuadratica
-deff('anCuad = cuadReg(x, y)', 'mat = [length(x), sum(x), sum(x^2), sum(y); sum(x), sum(x^2), sum(x^3), sumaDiag(y * x); sum(x^2), sum(x^3), sum(x^4), sumaDiag(y * (x^2))], mat = gaussJordan(mat), anCuad = mat(:,4)') 
-anCuad = cuadReg(x, y')
-anCuad
+function anCuad = cuadReg(dArrX, dArrY)
+    mat = [length(dArrX), sum(dArrX), sum(dArrX^2), sum(dArrY);
+           sum(dArrX), sum(dArrX^2), sum(dArrX^3), sumaDiag(dArrY' * dArrX);
+           sum(dArrX^2), sum(dArrX^3), sum(dArrX^4), sumaDiag(dArrY' * (dArrX^2))]
+      mat = gaussJordan(mat), 
+      anCuad = mat(:,4) 
+endfunction
 
-deff('an = cuadFun(x)', 'an = anCuad(1) + (anCuad(2) * x) + (anCuad(3) * (x^2))')
+anCuad = cuadReg(dArrX, dArrY)
 
-rCuad = calcR(cuadFun, x, y)
+deff('an = cuadFun(dArrX)', 'an = anCuad(1) + (anCuad(2) * dArrX) + (anCuad(3) * (dArrX^2))')
+
+rCuad = calcR(cuadFun, dArrX, dArrY)
 
 //regresion exponencial 
-deff('anExp = expReg(x, y)', 'mat = [length(x), sum(x), sum(log(y)); sum(x), sum(x^2), sumaDiag(log(y) * x)], mat = gaussJordan(mat), anExp = mat(:,3)')
+function anExp = expReg(dArrX, dArrY)
+    mat = [length(dArrX), sum(dArrX), sum(log(dArrY));
+           sum(dArrX), sum(dArrX^2), sumaDiag(log(dArrY') * dArrX)]
+    mat = gaussJordan(mat)
+anExp = mat(:,3)
+endfunction
 
 
-deff('regAnsExp = expFun(x)', 'regAnsExp = %e ^anExp(1) * %e ^ (anExp(2) * x)' )
-anExp = expReg(x, y')
+deff('regAnsExp = expFun(dArrX)', 'regAnsExp = %e ^anExp(1) * %e ^ (anExp(2) * dArrX)' )
+anExp = expReg(dArrX, dArrY)
 
-rExp = calcRLogs(expFun, x, y)
+rExp = calcRLogs(expFun, dArrX, dArrY)
 
 //regresion de potencia
-deff('anPot = potReg(x,y)', 'mat = [length(x), sum(log(x)), sum(log(y)); sum(log(x)), sum((log(x))^2), sumaDiag(log(x) * log(y))], mat = gaussJordan(mat), anPot = mat(:,3)')
-anPot = potReg(x, y')
+function anPot = potReg(dArrX,dArrY) 
+    mat = [length(dArrX), sum(log(dArrX)), sum(log(dArrY));
+           sum(log(dArrX)), sum((log(dArrX))^2), sumaDiag(log(dArrX) * log(dArrY'))]
+    mat = gaussJordan(mat)
+    anPot = mat(:,3)
+endfunction
 
-deff('an = potFun(x)', 'an = (%e ^ anPot(1)) * x ^ anPot(2)' )
+anPot = potReg(dArrX, dArrY)
 
-rPot = calcRLogs(potFun, x, y)
+deff('an = potFun(dArrX)', 'an = (%e ^ anPot(1)) * dArrX ^ anPot(2)' )
+
+rPot = calcRLogs(potFun, dArrX, dArrY)
 
 //mostrar seccion I, las formulas de regresion con su R cuadrada
-disp("- Lineal     :  y = (" + string(iLinB) + ') + (' + string(iLinM) + ') * x, r^2 = '+string(rLin))
+disp("- Lineal     :  y = (" + string(iLinB) + ") + (" + string(iLinM) + ") * x, r^2 = "+ string(rLin))
 disp("- Cuadrático :  y = (" + string(anCuad(1)) + ") + (" + string(anCuad(2)) + ") * x + (" + string(anCuad(3)) + ") * x ^ 2, r^ 2 = " + string(rCuad))
 disp("- Exponencial:  y = (" + string((%e ^ anExp(1))) + ") * e ^ ((" + string(anExp(2)) + ") * x), r ^ 2 = " + string(rExp))
 disp("- Potencial  :  y = (" + string((%e ^ anPot(1))) + ") * x ^ (" + string(anPot(2)) + "), r ^ 2 = " + string (rPot))
 
 
 //mostrar las conclusiones
-function [dBestR,sBest] = dGetR(rLin, rCuad, rExp, rPot)
+function [dBestR,sBest, funWin] = dGetR(rLin, rCuad, rExp, rPot)
     dBestR = max(rLin, rCuad, rExp, rPot)
     if dBestR == rLin then
         sBest = "lineal"
+        funWin = linFun
     end
     if dBestR == rCuad then
         sBest = "cuadrático"
+        funWin = cuadFun
     end
     if dBestR == rExp then
         sBest = "exponencial"
+        funWin = expFun
     end
     if dBestR == rPot then
         sBest = "potencial"
+        funWin = potFun
     end
     
 endfunction
 
-[dBestR,sBest] = dGetR(rLin, rCuad, rExp, rPot)
+[dBestR,sBest, funWin] = dGetR(rLin, rCuad, rExp, rPot)
 
 disp("- El mejor modelo será el " + sBest + ", con una r^2 de " + string(dBestR))
 
@@ -140,6 +153,9 @@ disp("      -Exponencial : " + string(dTemp))
 dTemp = potFun(60)
 disp("      -Potencial   : " + string(dTemp))
 
+//calcAnormales
+//funWin es la función que ganó en la regresión
+
 disp("De acuerdo con los cuadrador de las distancias entre cada punto y el modelo exponencial, existen valores anormales:")
 
 //Generar plots con PLOTLY
@@ -148,7 +164,19 @@ plot(xD, linFun(xD),"b", 'LineWidth', 2)
 plot(xD, cuadFun(xD),"g", 'LineWidth', 2)
 plot(xD, expFun(xD),"r", 'LineWidth', 2)
 plot(xD, potFun(xD),"black", 'LineWidth', 2)
+points = scatter(dArrX, dArrY, "black", "x")
 xtitle ( "Regresiones" , "X axis" , "Y axis" )
 legend("Lineal","Cuadrático","Exponencial", "Potencial")
 
 //generar nuevo .xls
+function outputFile(fun)
+    sFileName = input("¿Cómo quisiera llamar el archivo con los resultados? ", "string")
+    if grep(sFileName, '/.*\.csv$/', 'r') == []  then
+        sFileName = sFileName + '.csv'
+    end
+    disp("Generando archivo " + sFileName + '…')
+    write_csv(string(fun(dArrY)), sFileName)  
+endfunction
+
+outputFile(funWin)
+
