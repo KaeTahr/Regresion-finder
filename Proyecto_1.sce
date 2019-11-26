@@ -227,21 +227,46 @@ disp("      -Exponencial : " + string(dTemp))
 dTemp = potFun(60)
 disp("      -Potencial   : " + string(dTemp))
 
+function dAtypical = calcAnormales(dArrX, dArrY, funWin)
+    dDistances = []
+    for i = 1 : size(dArrX, 1)
+        dDistances(i) = (dArrY(i) - funWin(dArrX(i)))**2
+    end
+    dQuartiles = quart(dDistances)
+    dRange = dQuartiles(3) - dQuartiles(1)
+    dDownLimit = dQuartiles(1) - (1.5 * dRange)
+    dUpLimit = dQuartiles(3) + (1.5 * dRange)
+    
+    iIndex = 1
+    dAtypical = tlist(["listtype","X","Y"], [], [])
+    for i = 1 : size(dArrX, 1)
+        if dDistances(i) > dUpLimit | dDistances(i) < dDownLimit then
+            dAtypical.X(iIndex) = dArrX(i)
+            dAtypical.Y(iIndex) = dArrY(i)
+            iIndex = iIndex + 1
+        end
+    end
+endfunction
+
 //calcAnormales
 //funWin es la función que ganó en la regresión
+dAtypical = calcAnormales(dArrX, dArrY, funWin)
 
-disp("De acuerdo con los cuadrados de las distancias entre cada punto y el modelo exponencial, existen valores anormales:")
+disp("De acuerdo con los cuadrados de las distancias entre cada punto y el modelo " + sBest + ", existen valores anormales:")
+for i = 1 : size(dAtypical.Y,1)
+    disp( "(" + string(dAtypical.X(i)) + ", " + string(dAtypical.Y(i)) + ")")
+end
 
-//Generar plots con PLOTLY
-xD = [0:1:60]
-plot(xD, linFun(xD),"b", 'LineWidth', 2)
-plot(xD, cuadFun(xD),"g", 'LineWidth', 2)
-plot(xD, expFun(xD),"r", 'LineWidth', 2)
-plot(xD, potFun(xD),"black", 'LineWidth', 2)
+//Generar plots 
+iPlotPoints = [0:1:60]
+plot(iPlotPoints, linFun(iPlotPoints),"b", 'LineWidth', 2)
+plot(iPlotPoints, cuadFun(iPlotPoints),"g", 'LineWidth', 2)
+plot(iPlotPoints, expFun(iPlotPoints),"r", 'LineWidth', 2)
+plot(iPlotPoints, potFun(iPlotPoints),"black", 'LineWidth', 2)
 points = scatter(dArrX, dArrY, "black", "x")
 xtitle ( "Regresiones" , "X axis" , "Y axis" )
 legend("Lineal","Cuadrático","Exponencial", "Potencial")
 
-//generar nuevo .xls
+generar nuevo .xls
 outputFile(funWin)
 
