@@ -16,8 +16,8 @@ clear
 // pide al usuario el nombre un archivo xls y obtiene las primeras dos columnas
 // de la primera hoja de dicho archivo
 // Retorno
-// dArrx: Un vector con los valores de la primea columna
-// dArrY: Un vector con los valores de la segunda columna
+// 	dArrx: Un vector con los valores de la primea columna
+// 	dArrY: Un vector con los valores de la segunda columna
 ////////////////////////////////////////
 function [dArrX, dArrY] = getFile()
     sFileName = input("¿Cuál es el nombre del archivo .xls? ", "string")
@@ -61,7 +61,11 @@ endfunction
 
 ////////////////////////////////////////
 // sumaDiag
-// TODO write docstring
+// Suma la diagonal principal de una matriz
+// Parametros:
+// 	dMat: Una matriz con valores double
+// Retorno
+// 	dSum: el resultado de la suma de la diagonal principal
 ////////////////////////////////////////
 function dSum = sumaDiag(dMat)
     dSum = 0
@@ -72,7 +76,16 @@ endfunction
 
 ////////////////////////////////////////
 // dGetR
-// TODO write docstring
+// Obtiene la funcion y consigue los datos correspondientes para el display
+// Parametros:
+// 	rLin: valor de la R cuadrada de la función lineal
+// 	rCuad: valor de la R cuadrada de la función cuadrática
+// 	rExp: valor de la R cuadrada de la función exponencial
+// 	rPot: valor de la R cuadrada de la función potencial
+// Retorno:
+// 	dBestR: Representa el valor R cuadrada más grande de las funciones de regresión
+// 	sBest: Representa una palabra que describe la función con mejor R cuadrada
+// 	funWin: Toma la función de la regresion con mejor R cuadrada
 ////////////////////////////////////////
 function [dBestR,sBest, funWin] = dGetR(rLin, rCuad, rExp, rPot)
     dBestR = max(rLin, rCuad, rExp, rPot)
@@ -99,9 +112,11 @@ endfunction
 // Calcula el valor de r² dado un vector de valores x, y, y la función de
 // regresión utilizada
 // Parametros:
-//  func: La función de regresión que se utilizará para calcular la regresión
-//  dArrX: Un vector que contiene los valores X
-//  dArrY: Un vcector que contiene los valores y
+// 	func: La función de regresión que se utilizará para calcular la regresión
+// 	dArrX: Un vector que contiene los valores X
+// 	dArrY: Un vcector que contiene los valores Y
+// Retorno:
+// 	dRsq: valor de la R cuadrada de la función correspondiente (aplicabe en lineal y cuadrática)
 ////////////////////////////////////////
 function dRsq = calcR(func, dArrX, dArrY)
     dSST = sum((dArrY - mean(dArrY))^2)
@@ -110,13 +125,15 @@ function dRsq = calcR(func, dArrX, dArrY)
 endfunction
 
 ////////////////////////////////////////
-// calcR
+// calcRLogs
 // Calcula el valor de r² dado un vector de valores x, y, y la función de
 // regresión utilizada. Usar con regresiones exponenciales y de potencia
 // Parametros:
-//  func: La función de regresión que se utilizará para calcular la regresión
-//  dArrX: Un vector que contiene los valores X
-//  dArrY: Un vcector que contiene los valores y
+// 	func: La función de regresión que se utilizará para calcular la regresión
+// 	dArrX: Un vector que contiene los valores X
+// 	dArrY: Un vcector que contiene los valores Y
+// Retorno:
+// 	dRsq: valor de la R cuadrada de la función correspondiente
 ////////////////////////////////////////
 function dRsq = calcRLogs(func, dArrX, dArrY)
     dSST = sum((log(dArrY) - mean(log(dArrY)))^2)
@@ -126,7 +143,13 @@ endfunction
 
 ////////////////////////////////////////
 // cuadReg
-// TODO: Write docstring
+// Esta función crea la matriz correspondiente a la función cuadrática y 
+// obtiene la ecuación de la regresión correspondiente
+// Parametros:
+// 	dArrX: Un vector que contiene los valores X
+// 	dArrY: Un vcector que contiene los valores Y
+// Retorno:
+// 	anCuad: un vector con los valores de la función 
 ////////////////////////////////////////
 function anCuad = cuadReg(dArrX, dArrY)
     mat = [length(dArrX), sum(dArrX), sum(dArrX^2), sum(dArrY);
@@ -138,7 +161,13 @@ endfunction
 
 ////////////////////////////////////////
 // expReg
-// TODO: Write docstring
+// Esta función crea la matriz correspondiente a la función exponencial y 
+// obtiene la ecuación de la regresión correspondiente
+// Parametros:
+// 	dArrX: Un vector que contiene los valores X
+// 	dArrY: Un vcector que contiene los valores Y
+// Retorno:
+// 	anExp: un vector con los valores de la función
 ////////////////////////////////////////
 function anExp = expReg(dArrX, dArrY)
    dMat = [length(dArrX), sum(dArrX), sum(log(dArrY));
@@ -149,7 +178,13 @@ endfunction
 
 ////////////////////////////////////////
 // anPot
-// TODO: Write docstring
+// Esta función crea la matriz correspondiente a la función cuadrática y 
+// obtiene la ecuación de la regresión
+// Parametros:
+// 	dArrX: Un vector que contiene los valores X
+// 	dArrY: Un vcector que contiene los valores Y
+// Retorno:
+// 	anPot: un vector con los valores de la función
 ////////////////////////////////////////
 function anPot = potReg(dArrX,dArrY) 
     dMat = [length(dArrX), sum(log(dArrX)), sum(log(dArrY));
@@ -159,12 +194,46 @@ function anPot = potReg(dArrX,dArrY)
 endfunction
 
 ////////////////////////////////////////
+// calcAnormales
+// Esta función encuentra los valores atípicos con respecto a la mejor 
+// regresión utilizando la regla del 1.5 usando rangos intercuartiles
+// Parametros:
+// 	dArrX: Un vector que contiene los valores X
+// 	dArrY: Un vcector que contiene los valores Y
+// 	funWin: La función con mejor R cuadrada
+// Retorno:
+// 	dAtyplical: lista cuyos elementos corresponden a los puntos con datos atípicos
+////////////////////////////////////////
+function dAtypical = calcAnormales(dArrX, dArrY, funWin)
+    dDistances = []
+    
+    for i = 1 : size(dArrX, 1)
+        dDistances(i) = (dArrY(i) - funWin(dArrX(i)))**2
+    end
+    
+    dQuartiles = quart(dDistances)
+    dRange = dQuartiles(3) - dQuartiles(1)
+    dDownLimit = dQuartiles(1) - (1.5 * dRange)
+    dUpLimit = dQuartiles(3) + (1.5 * dRange)
+    
+    iIndex = 1
+    dAtypical = tlist(["listtype","X","Y"], [], [])
+    for i = 1 : size(dArrX, 1)
+        if dDistances(i) > dUpLimit | dDistances(i) < dDownLimit then
+            dAtypical.X(iIndex) = dArrX(i)
+            dAtypical.Y(iIndex) = dArrY(i)
+            iIndex = iIndex + 1
+        end
+    end
+endfunction
+
+////////////////////////////////////////
 // outputFile
 // Le pide al usuario el nombre del arhivo con el que quiere generar el output
 // y lo escribe, utilizando la función dada
 // Parámetros:
 //  fun: La funcion con la que se escribirá el archivo
-// Output:
+// Retorno:
 //  NONE, pero escribe un archivo al disco
 ////////////////////////////////////////
 function outputFile(fun)
@@ -226,27 +295,6 @@ dTemp = expFun(60)
 disp("      -Exponencial : " + string(dTemp))
 dTemp = potFun(60)
 disp("      -Potencial   : " + string(dTemp))
-
-function dAtypical = calcAnormales(dArrX, dArrY, funWin)
-    dDistances = []
-    for i = 1 : size(dArrX, 1)
-        dDistances(i) = (dArrY(i) - funWin(dArrX(i)))**2
-    end
-    dQuartiles = quart(dDistances)
-    dRange = dQuartiles(3) - dQuartiles(1)
-    dDownLimit = dQuartiles(1) - (1.5 * dRange)
-    dUpLimit = dQuartiles(3) + (1.5 * dRange)
-    
-    iIndex = 1
-    dAtypical = tlist(["listtype","X","Y"], [], [])
-    for i = 1 : size(dArrX, 1)
-        if dDistances(i) > dUpLimit | dDistances(i) < dDownLimit then
-            dAtypical.X(iIndex) = dArrX(i)
-            dAtypical.Y(iIndex) = dArrY(i)
-            iIndex = iIndex + 1
-        end
-    end
-endfunction
 
 //calcAnormales
 //funWin es la función que ganó en la regresión
