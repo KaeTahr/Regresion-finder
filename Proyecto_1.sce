@@ -236,18 +236,19 @@ endfunction
 // Retorno:
 //  NONE, pero escribe un archivo al disco
 ////////////////////////////////////////
-function outputFile(fun)
+function outputFile(fun, dToEval)
     sFileName = input("¿Cómo quisiera llamar el archivo con los resultados? ", "string")
     if grep(sFileName, '/.*\.csv$/', 'r') == []  then
         sFileName = sFileName + '.csv'
     end
     disp("Generando archivo " + sFileName)
-    write_csv(string(fun(dArrY)), sFileName)  
+    write_csv(string(cat(1,fun(dArrY),fun(dToEval))), sFileName) 
 endfunction
 
 /////////////////////////////////////main//////////////////////////////////////
 //Pedir archivo .xls
 [dArrX,dArrY] = getFile()
+dToEval = input("¿En que valor desea calcular la regresión? ")
 
 ////obtener regresiones y su R cuadrada
 
@@ -286,14 +287,14 @@ disp("- El mejor modelo será el " + sBest + ", con una r^2 de " + string(dBestR
 
 dTemp = 0
 
-disp("Usando cada modelo, los valores estimados para x = 60 serán:")
-dTemp = linFun(60)
+disp("Usando cada modelo, los valores estimados para x = " + string(dToEval) + " serán:")
+dTemp = linFun(dToEval)
 disp("      -Lineal      : " + string(dTemp))
-dTemp = cuadFun(60)
+dTemp = cuadFun(dToEval)
 disp("      -Cuadrático  : " + string(dTemp))
-dTemp = expFun(60)
+dTemp = expFun(dToEval)
 disp("      -Exponencial : " + string(dTemp))
-dTemp = potFun(60)
+dTemp = potFun(dToEval)
 disp("      -Potencial   : " + string(dTemp))
 
 //calcAnormales
@@ -306,7 +307,9 @@ for i = 1 : size(dAtypical.Y,1)
 end
 
 //Generar plots 
-iPlotPoints = [0:1:60]
+bigNum = max(dArrX, dToEval)
+bigNum = bigNum(1) + 5
+iPlotPoints = [0:1:bigNum]
 plot(iPlotPoints, linFun(iPlotPoints),"b", 'LineWidth', 2)
 plot(iPlotPoints, cuadFun(iPlotPoints),"g", 'LineWidth', 2)
 plot(iPlotPoints, expFun(iPlotPoints),"r", 'LineWidth', 2)
@@ -316,5 +319,5 @@ xtitle ( "Regresiones" , "X axis" , "Y axis" )
 legend("Lineal","Cuadrático","Exponencial", "Potencial")
 
 //generar nuevo .xls
-outputFile(funWin)
+outputFile(funWin, dToEval)
 
