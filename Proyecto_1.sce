@@ -267,6 +267,6 @@ points = scatter(dArrX, dArrY, "black", "x")
 xtitle ( "Regresiones" , "X axis" , "Y axis" )
 legend("Lineal","Cuadrático","Exponencial", "Potencial")
 
-generar nuevo .xls
+//generar nuevo .xls
 outputFile(funWin)
 
