@@ -242,7 +242,7 @@ function outputFile(fun, dToEval)
         sFileName = sFileName + '.csv'
     end
     disp("Generando archivo " + sFileName)
-    write_csv(string(cat(1,fun(dArrY),fun(dToEval))), sFileName) 
+    write_csv(string(cat(1,fun(dArrY),fun(dToEval))), sFileName)
 endfunction
 
 /////////////////////////////////////main//////////////////////////////////////
@@ -307,9 +307,9 @@ for i = 1 : size(dAtypical.Y,1)
 end
 
 //Generar plots 
-bigNum = max(dArrX, dToEval)
-bigNum = bigNum(1) + 5
-iPlotPoints = [0:1:bigNum]
+dBigNum = max([dArrX', dToEval])
+dBigNum = dBigNum+ 5
+iPlotPoints = [0:1:dBigNum]
 plot(iPlotPoints, linFun(iPlotPoints),"b", 'LineWidth', 2)
 plot(iPlotPoints, cuadFun(iPlotPoints),"g", 'LineWidth', 2)
 plot(iPlotPoints, expFun(iPlotPoints),"r", 'LineWidth', 2)
