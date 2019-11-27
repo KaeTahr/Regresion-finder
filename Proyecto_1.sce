@@ -1,7 +1,7 @@
 clear
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // Encuantra_Regresiones_1.sce
-// El programa lee de un archivo de excel, cuyo nombre es dado ppor el usuario
+// El programa lee de un archivo de excel, cuyo nombre es dado por el usuario
 // Calcula funciones de regrion lineal, de cuadrática, de potencia, y
 // exponencial. Despliega cada una de estas funciones a la consola, además de 
 // desplegar una gráfica con cada una de estas regresiones. Finalmente,
@@ -9,16 +9,16 @@ clear
 // David García - A01570231
 // Kevin Chinchilla - A00825945
 // 27/11/2019 v 1.0
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // getFile
 // pide al usuario el nombre un archivo xls y obtiene las primeras dos columnas
 // de la primera hoja de dicho archivo
 // Retorno
 // 	dArrx: Un vector con los valores de la primea columna
 // 	dArrY: Un vector con los valores de la segunda columna
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function [dArrX, dArrY] = getFile()
     sFileName = input("¿Cuál es el nombre del archivo .xls? ", "string")
     if grep(sFileName, '/.*\.xls$/', 'r') == []  then
@@ -31,14 +31,14 @@ function [dArrX, dArrY] = getFile()
     dArrY=dSheet(:,2)
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // gaussJordan
 // Resuelve una matriz por el metodo de Gauss-Jordan
 // Parametros:
 // 	dMat: Una matriz de double
 // Retorno:
 //	dMat: Una matriz resuelta de double
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function dMat = gaussJordan(dMat)
     fact = 0
     for iRowIndex = 1 : size(dMat, 1)
@@ -59,14 +59,14 @@ function dMat = gaussJordan(dMat)
     end
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // sumaDiag
 // Suma la diagonal principal de una matriz
 // Parametros:
 // 	dMat: Una matriz con valores double
 // Retorno
 // 	dSum: el resultado de la suma de la diagonal principal
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function dSum = sumaDiag(dMat)
     dSum = 0
     for iIndex = 1 : size(dMat,1)
@@ -74,7 +74,7 @@ function dSum = sumaDiag(dMat)
     end
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // dGetR
 // Obtiene la funcion y consigue los datos correspondientes para el display
 // Parametros:
@@ -86,7 +86,7 @@ endfunction
 // 	dBestR: Representa el valor R cuadrada más grande de las funciones de regresión
 // 	sBest: Representa una palabra que describe la función con mejor R cuadrada
 // 	funWin: Toma la función de la regresion con mejor R cuadrada
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function [dBestR,sBest, funWin] = dGetR(rLin, rCuad, rExp, rPot)
     dBestR = max(rLin, rCuad, rExp, rPot)
     if dBestR == rLin then
@@ -107,7 +107,7 @@ function [dBestR,sBest, funWin] = dGetR(rLin, rCuad, rExp, rPot)
     end
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // calcR
 // Calcula el valor de r² dado un vector de valores x, y, y la función de
 // regresión utilizada
@@ -117,14 +117,14 @@ endfunction
 // 	dArrY: Un vcector que contiene los valores Y
 // Retorno:
 // 	dRsq: valor de la R cuadrada de la función correspondiente (aplicabe en lineal y cuadrática)
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function dRsq = calcR(func, dArrX, dArrY)
     dSST = sum((dArrY - mean(dArrY))^2)
     dSSR = sum((dArrY - func(dArrX) )^2)
     dRsq = 1 - (dSSR / dSST)
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // calcRLogs
 // Calcula el valor de r² dado un vector de valores x, y, y la función de
 // regresión utilizada. Usar con regresiones exponenciales y de potencia
@@ -134,14 +134,14 @@ endfunction
 // 	dArrY: Un vcector que contiene los valores Y
 // Retorno:
 // 	dRsq: valor de la R cuadrada de la función correspondiente
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function dRsq = calcRLogs(func, dArrX, dArrY)
     dSST = sum((log(dArrY) - mean(log(dArrY)))^2)
     dSSR = sum((log(dArrY) - log(func(dArrX)) )^2)
     dRsq = 1 - (dSSR / dSST)
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // cuadReg
 // Esta función crea la matriz correspondiente a la función cuadrática y 
 // obtiene la ecuación de la regresión correspondiente
@@ -150,13 +150,13 @@ endfunction
 // 	dArrY: Un vcector que contiene los valores Y
 // Retorno:
 // 	anCuad: un vector con los valores de la función 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function anCuad = cuadReg(dArrX, dArrY)
     mat = [length(dArrX), sum(dArrX), sum(dArrX^2), sum(dArrY);
-           sum(dArrX), sum(dArrX^2), sum(dArrX^3), sumaDiag(dArrY' * dArrX);
-           sum(dArrX^2), sum(dArrX^3), sum(dArrX^4), sumaDiag(dArrY' * (dArrX^2))]
-      mat = gaussJordan(mat), 
-      anCuad = mat(:,4) 
+    sum(dArrX), sum(dArrX^2), sum(dArrX^3), sumaDiag(dArrY' * dArrX);
+    sum(dArrX^2), sum(dArrX^3), sum(dArrX^4), sumaDiag(dArrY' * (dArrX^2))]
+    mat = gaussJordan(mat), 
+    anCuad = mat(:,4) 
 endfunction
 
 ////////////////////////////////////////
@@ -170,13 +170,13 @@ endfunction
 // 	anExp: un vector con los valores de la función
 ////////////////////////////////////////
 function anExp = expReg(dArrX, dArrY)
-   dMat = [length(dArrX), sum(dArrX), sum(log(dArrY));
-           sum(dArrX), sum(dArrX^2), sumaDiag(log(dArrY') * dArrX)]
+    dMat = [length(dArrX), sum(dArrX), sum(log(dArrY));
+    sum(dArrX), sum(dArrX^2), sumaDiag(log(dArrY') * dArrX)]
     dMat = gaussJordan(dMat)
-anExp = dMat(:,3)
+    anExp = dMat(:,3)
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // anPot
 // Esta función crea la matriz correspondiente a la función cuadrática y 
 // obtiene la ecuación de la regresión
@@ -185,15 +185,15 @@ endfunction
 // 	dArrY: Un vcector que contiene los valores Y
 // Retorno:
 // 	anPot: un vector con los valores de la función
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function anPot = potReg(dArrX,dArrY) 
     dMat = [length(dArrX), sum(log(dArrX)), sum(log(dArrY));
-           sum(log(dArrX)), sum((log(dArrX))^2), sumaDiag(log(dArrX) * log(dArrY'))]
+    sum(log(dArrX)), sum((log(dArrX))^2), sumaDiag(log(dArrX) * log(dArrY'))]
     dMat = gaussJordan(dMat)
     anPot = dMat(:,3)
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // calcAnormales
 // Esta función encuentra los valores atípicos con respecto a la mejor 
 // regresión utilizando la regla del 1.5 usando rangos intercuartiles
@@ -203,19 +203,19 @@ endfunction
 // 	funWin: La función con mejor R cuadrada
 // Retorno:
 // 	dAtyplical: lista cuyos elementos corresponden a los puntos con datos atípicos
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function dAtypical = calcAnormales(dArrX, dArrY, funWin)
     dDistances = []
-    
+
     for i = 1 : size(dArrX, 1)
         dDistances(i) = (dArrY(i) - funWin(dArrX(i)))**2
     end
-    
+
     dQuartiles = quart(dDistances)
     dRange = dQuartiles(3) - dQuartiles(1)
     dDownLimit = dQuartiles(1) - (1.5 * dRange)
     dUpLimit = dQuartiles(3) + (1.5 * dRange)
-    
+
     iIndex = 1
     dAtypical = tlist(["listtype","X","Y"], [], [])
     for i = 1 : size(dArrX, 1)
@@ -227,7 +227,7 @@ function dAtypical = calcAnormales(dArrX, dArrY, funWin)
     end
 endfunction
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // outputFile
 // Le pide al usuario el nombre del arhivo con el que quiere generar el output
 // y lo escribe, utilizando la función dada
@@ -235,23 +235,29 @@ endfunction
 //  fun: La funcion con la que se escribirá el archivo
 // Retorno:
 //  NONE, pero escribe un archivo al disco
-////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function outputFile(fun, dToEval)
     disp ("Que intervalo le gustaria que evaluara la regresion?")
     vX = []
     vY = []
-    iLimInf = input("Limite inferior: ")
-    iLimSup = input("Limite superior:")
+    iLimInf = 2
+    iLimSup = 1
+    
+    while iLimSup < iLimInf
+        disp("El limite superior debe ser mayor al menor")
+        iLimInf = input("Limite inferior: ")
+        iLimSup = input("Limite superior: ")
+    end
     iSaltos = input("En saltos de cuanto en cuanto: ")
     iIndice = 1
-    
+
     for i = iLimInf : iSaltos : iLimSup
         vX(iIndice) = i
         vY(iIndice) = fun(i)
         iIndice = iIndice + 1
     end
     dMatDat = [vX, vY]
-    disp(dMatDat)
+
     sFileName = input("¿Cómo quisiera llamar el archivo con los resultados? ", "string")
     if grep(sFileName, '/.*\.csv$/', 'r') == []  then
         sFileName = sFileName + '.csv'
@@ -316,11 +322,12 @@ disp("      -Potencial   : " + string(dTemp))
 //funWin es la función que ganó en la regresión
 dAtypical = calcAnormales(dArrX, dArrY, funWin)
 
-disp("De acuerdo con los cuadrados de las distancias entre cada punto y el modelo " + sBest + ", existen valores anormales:")
-for i = 1 : size(dAtypical.Y,1)
-    disp( "(" + string(dAtypical.X(i)) + ", " + string(dAtypical.Y(i)) + ")")
+if dAtypical.X <> [] then
+    disp("De acuerdo con los cuadrados de las distancias entre cada punto y el modelo " + sBest + ", existen valores anormales:")
+    for i = 1 : size(dAtypical.Y,1)
+        disp( "(" + string(dAtypical.X(i)) + ", " + string(dAtypical.Y(i)) + ")")
+    end
 end
-
 //Generar plots 
 dBigNum = max([dArrX', dToEval])
 dBigNum = dBigNum+ 5
