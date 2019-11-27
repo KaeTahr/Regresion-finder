@@ -237,12 +237,27 @@ endfunction
 //  NONE, pero escribe un archivo al disco
 ////////////////////////////////////////
 function outputFile(fun, dToEval)
+    disp ("Que intervalo le gustaria que evaluara la regresion?")
+    vX = []
+    vY = []
+    iLimInf = input("Limite inferior: ")
+    iLimSup = input("Limite superior:")
+    iSaltos = input("En saltos de cuanto en cuanto: ")
+    iIndice = 1
+    
+    for i = iLimInf : iSaltos : iLimSup
+        vX(iIndice) = i
+        vY(iIndice) = fun(i)
+        iIndice = iIndice + 1
+    end
+    dMatDat = [vX, vY]
+    disp(dMatDat)
     sFileName = input("¿Cómo quisiera llamar el archivo con los resultados? ", "string")
     if grep(sFileName, '/.*\.csv$/', 'r') == []  then
         sFileName = sFileName + '.csv'
     end
     disp("Generando archivo " + sFileName)
-    write_csv(string(cat(1,fun(dArrY),fun(dToEval))), sFileName)
+    write_csv(string(dMatDat), sFileName)
 endfunction
 
 /////////////////////////////////////main//////////////////////////////////////
